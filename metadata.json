@@ -1,0 +1,7 @@
+{
+  "name": "YOGA24go",
+  "description": "結合二十四節氣與中醫經絡的 AI 瑜珈姿態辨識 APP",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}

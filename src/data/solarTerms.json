@@ -1,0 +1,218 @@
+[
+  {
+    "name": "小寒", "month": 1, "day": 5,
+    "meridian": "足少陰腎經", "meridianVessel": "腎經", "meridianSinew": "足少陰之筋",
+    "poses": [
+      { "name": "幻椅式", "desc": "固護腎氣，增強下肢力量", "imageUrl": "https://images.unsplash.com/photo-1599901860904-17e6ed7083a0?auto=format&fit=crop&q=80&w=400" },
+      { "name": "站立前彎", "desc": "伸展膀胱經，促進背部血液循環" },
+      { "name": "英雄式", "desc": "打開胸腔，提升全身熱能" }
+    ]
+  },
+  {
+    "name": "大寒", "month": 1, "day": 20,
+    "meridian": "足太陽膀胱經", "meridianVessel": "膀胱經", "meridianSinew": "足太陽之筋",
+    "poses": [
+      { "name": "戰士一式", "desc": "提升體溫，促進血液循環" },
+      { "name": "戰士二式", "desc": "強化腿部力量，穩定心神" },
+      { "name": "戰士三式", "desc": "鍛鍊平衡感，增強核心" }
+    ]
+  },
+  {
+    "name": "立春", "month": 2, "day": 4,
+    "meridian": "足厥陰肝經", "meridianVessel": "肝經", "meridianSinew": "足厥陰之筋",
+    "poses": [
+      { "name": "樹式", "desc": "春屬木，如樹木般扎根生長，疏肝理氣", "imageUrl": "[https://ibb.co/W4YGMZFx][img]https://i.ibb.co/LX2Ycm6k/tree-pose.png[/img][/url]" },
+      { "name": "摩天式", "desc": "向上伸展，順應春氣生發" },
+      { "name": "鷹式", "desc": "擠壓關節，促進氣血循環" }
+    ]
+  },
+  {
+    "name": "雨水", "month": 2, "day": 19,
+    "meridian": "足少陽膽經", "meridianVessel": "膽經", "meridianSinew": "足少陽之筋",
+    "poses": [
+      { "name": "貓牛式", "desc": "舒展脊椎，喚醒身體活力" },
+      { "name": "虎式", "desc": "活動髖關節，疏通膽經" },
+      { "name": "兔子式", "desc": "放鬆後背，緩解春困" }
+    ]
+  },
+  {
+    "name": "驚蟄", "month": 3, "day": 5,
+    "meridian": "手陽明大腸經", "meridianVessel": "大腸經", "meridianSinew": "手陽明之筋",
+    "poses": [
+      { "name": "下犬式", "desc": "全身伸展，激發陽氣" },
+      { "name": "上犬式", "desc": "打開胸腔，迎接春雷" },
+      { "name": "鱷魚式", "desc": "強化核心，喚醒生命力" }
+    ]
+  },
+  {
+    "name": "春分", "month": 3, "day": 20,
+    "meridian": "足厥陰肝經", "meridianVessel": "肝經", "meridianSinew": "足厥陰之筋",
+    "poses": [
+      { "name": "樹式", "desc": "陰陽平衡，平心靜氣", "imageUrl": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&q=80&w=400" },
+      { "name": "門閂式", "desc": "伸展側腰，疏通肝膽經絡" },
+      { "name": "三角式", "desc": "穩定下盤，平衡左右能量" }
+    ]
+  },
+  {
+    "name": "清明", "month": 4, "day": 4,
+    "meridian": "手太陰肺經", "meridianVessel": "肺經", "meridianSinew": "手太陰之筋",
+    "poses": [
+      { "name": "嬰兒式", "desc": "放鬆身心，清淨頭腦" },
+      { "name": "大拜式", "desc": "臣服大地，平靜思緒" },
+      { "name": "仰臥束角式", "desc": "打開胸腔，深呼吸養肺" }
+    ]
+  },
+  {
+    "name": "穀雨", "month": 4, "day": 20,
+    "meridian": "足太陰脾經", "meridianVessel": "脾經", "meridianSinew": "足太陰之筋",
+    "poses": [
+      { "name": "蝴蝶式", "desc": "打開髖部，促進骨盆血液循環" },
+      { "name": "坐角式", "desc": "伸展大腿內側，健脾除濕" },
+      { "name": "青蛙式", "desc": "深度開髖，釋放壓力" }
+    ]
+  },
+  {
+    "name": "立夏", "month": 5, "day": 5,
+    "meridian": "手少陰心經", "meridianVessel": "心經", "meridianSinew": "手少陰之筋",
+    "poses": [
+      { "name": "戰士二式", "desc": "強健心肺，迎接夏日活力" },
+      { "name": "反轉戰士式", "desc": "打開側胸，提升心氣" },
+      { "name": "側角伸展式", "desc": "全身延展，促進氣血運行" }
+    ]
+  },
+  {
+    "name": "小滿", "month": 5, "day": 21,
+    "meridian": "足太陰脾經", "meridianVessel": "脾經", "meridianSinew": "足太陰之筋",
+    "poses": [
+      { "name": "半月式", "desc": "平衡身心，去除濕氣" },
+      { "name": "舞王式", "desc": "優雅伸展，提升專注力" },
+      { "name": "新月式", "desc": "打開腹股溝，健脾胃" }
+    ]
+  },
+  {
+    "name": "芒種", "month": 6, "day": 5,
+    "meridian": "足陽明胃經", "meridianVessel": "胃經", "meridianSinew": "足陽明之筋",
+    "poses": [
+      { "name": "船式", "desc": "鍛鍊核心，增強脾胃功能" },
+      { "name": "半船式", "desc": "強化腹部，促進消化" },
+      { "name": "仰臥起坐式", "desc": "按摩內臟，改善腸胃" }
+    ]
+  },
+  {
+    "name": "夏至", "month": 6, "day": 21,
+    "meridian": "手太陽小腸經", "meridianVessel": "小腸經", "meridianSinew": "手太陽之筋",
+    "poses": [
+      { "name": "拜日式", "desc": "吸收陽氣，充滿能量" },
+      { "name": "輪式", "desc": "極度後彎，激發生命力" },
+      { "name": "狂野式", "desc": "釋放熱情，打開胸腔" }
+    ]
+  },
+  {
+    "name": "小暑", "month": 7, "day": 7,
+    "meridian": "手厥陰心包經", "meridianVessel": "心包經", "meridianSinew": "手厥陰之筋",
+    "poses": [
+      { "name": "橋式", "desc": "打開胸腔，散熱降溫" },
+      { "name": "支撐橋式", "desc": "放鬆腰背，寧心安神" },
+      { "name": "單腿橋式", "desc": "強化臀腿，穩定心包經" }
+    ]
+  },
+  {
+    "name": "大暑", "month": 7, "day": 22,
+    "meridian": "手少陽三焦經", "meridianVessel": "三焦經", "meridianSinew": "手少陽之筋",
+    "poses": [
+      { "name": "獅子式", "desc": "釋放壓力，清熱解毒" },
+      { "name": "金剛坐", "desc": "平靜心靈，降火除煩" },
+      { "name": "英雄坐", "desc": "伸展腳踝，疏通三焦" }
+    ]
+  },
+  {
+    "name": "立秋", "month": 8, "day": 7,
+    "meridian": "手太陰肺經", "meridianVessel": "肺經", "meridianSinew": "手太陰之筋",
+    "poses": [
+      { "name": "駱駝式", "desc": "擴展胸腔，潤肺養陰" },
+      { "name": "半駱駝式", "desc": "溫和後彎，預防秋燥" },
+      { "name": "兔子式", "desc": "反向伸展，平衡脊椎" }
+    ]
+  },
+  {
+    "name": "處暑", "month": 8, "day": 23,
+    "meridian": "足太陰脾經", "meridianVessel": "脾經", "meridianSinew": "足太陰之筋",
+    "poses": [
+      { "name": "坐姿前彎", "desc": "收斂神氣，平靜內心" },
+      { "name": "單腿前彎", "desc": "伸展腿後側，健脾除濕" },
+      { "name": "半蓮花前彎", "desc": "深度放鬆，沉澱思緒" }
+    ]
+  },
+  {
+    "name": "白露", "month": 9, "day": 7,
+    "meridian": "手陽明大腸經", "meridianVessel": "大腸經", "meridianSinew": "手陽明之筋",
+    "poses": [
+      { "name": "眼鏡蛇式", "desc": "強化背部，預防秋燥" },
+      { "name": "人面獅身式", "desc": "溫和開胸，滋養肺部" },
+      { "name": "蝗蟲式", "desc": "鍛鍊背肌，提升免疫力" }
+    ]
+  },
+  {
+    "name": "秋分", "month": 9, "day": 23,
+    "meridian": "手太陰肺經", "meridianVessel": "肺經", "meridianSinew": "手太陰之筋",
+    "poses": [
+      { "name": "三角式", "desc": "陰陽平衡，穩定情緒" },
+      { "name": "扭轉三角式", "desc": "按摩內臟，促進排毒" },
+      { "name": "側角式", "desc": "全身延展，順暢呼吸" }
+    ]
+  },
+  {
+    "name": "寒露", "month": 10, "day": 8,
+    "meridian": "足少陽膽經", "meridianVessel": "膽經", "meridianSinew": "足少陽之筋",
+    "poses": [
+      { "name": "鴿子式", "desc": "深層伸展，保暖關節" },
+      { "name": "睡鴿式", "desc": "放鬆髖部，緩解秋乏" },
+      { "name": "美人魚式", "desc": "優雅開胸，疏通膽經" }
+    ]
+  },
+  {
+    "name": "霜降", "month": 10, "day": 23,
+    "meridian": "手太陽小腸經", "meridianVessel": "小腸經", "meridianSinew": "手太陽之筋",
+    "poses": [
+      { "name": "牛面式", "desc": "打開肩頸，防寒保暖" },
+      { "name": "鷹式手臂", "desc": "伸展上背，緩解僵硬" },
+      { "name": "反轉祈禱式", "desc": "打開胸腔，促進血液循環" }
+    ]
+  },
+  {
+    "name": "立冬", "month": 11, "day": 7,
+    "meridian": "足少陰腎經", "meridianVessel": "腎經", "meridianSinew": "足少陰之筋",
+    "poses": [
+      { "name": "大屍首式", "desc": "深度休息，收藏陽氣" },
+      { "name": "仰臥扭轉", "desc": "放鬆脊椎，滋養腎氣" },
+      { "name": "快樂嬰兒式", "desc": "釋放下背壓力，安神定志" }
+    ]
+  },
+  {
+    "name": "小雪", "month": 11, "day": 22,
+    "meridian": "手太陰肺經", "meridianVessel": "肺經", "meridianSinew": "手太陰之筋",
+    "poses": [
+      { "name": "魚式", "desc": "打開胸腔，增強免疫力" },
+      { "name": "支撐魚式", "desc": "溫和開胸，預防感冒" },
+      { "name": "仰臥英雄式", "desc": "伸展大腿，促進氣血" }
+    ]
+  },
+  {
+    "name": "大雪", "month": 12, "day": 7,
+    "meridian": "足少陰腎經", "meridianVessel": "腎經", "meridianSinew": "足少陰之筋",
+    "poses": [
+      { "name": "弓式", "desc": "刺激內分泌，全身保暖" },
+      { "name": "半弓式", "desc": "溫和後彎，強化背部" },
+      { "name": "搖籃式", "desc": "按摩腹部，促進消化" }
+    ]
+  },
+  {
+    "name": "冬至", "month": 12, "day": 21,
+    "meridian": "足太陽膀胱經", "meridianVessel": "膀胱經", "meridianSinew": "足太陽之筋",
+    "poses": [
+      { "name": "頭倒立", "desc": "引血回流，滋養大腦" },
+      { "name": "靠牆倒箭式", "desc": "溫和倒立，消除腿部疲勞" },
+      { "name": "肩立式", "desc": "刺激甲狀腺，平衡內分泌" }
+    ]
+  }
+]
