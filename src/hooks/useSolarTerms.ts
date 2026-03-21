@@ -22,8 +22,22 @@ export function useSolarTerms() {
         if (Array.isArray(data) && data.length > 0) {
           // 確保資料格式正確，將平坦的 sheet 資料轉換為 nested poses array
           const formattedData = data.map(item => {
-            // 如果已經是 nested 格式 (例如從預設 JSON 來的)，就直接回傳
-            if (item.poses) return item;
+            // 尋找對應的 defaultData 以保留 imageUrl
+            const defaultTerm = defaultData.find(t => t.name === item.name);
+
+            // 如果已經是 nested 格式 (例如從預設 JSON 來的)
+            if (item.poses) {
+              return {
+                ...item,
+                poses: item.poses.map((p: any, index: number) => {
+                  const defaultPose = defaultTerm?.poses.find(dp => dp.name.trim() === (p.name || '').trim()) || defaultTerm?.poses[index];
+                  return {
+                    ...p,
+                    imageUrl: p.imageUrl || defaultPose?.imageUrl
+                  };
+                })
+              };
+            }
             
             // 否則進行轉換
             return {
@@ -34,9 +48,27 @@ export function useSolarTerms() {
               meridianVessel: item.meridianVessel || '',
               meridianSinew: item.meridianSinew || '',
               poses: [
-                { name: item.yoga1 || '', desc: item.desc1 || '' },
-                { name: item.yoga2 || '', desc: item.desc2 || '' },
-                { name: item.yoga3 || '', desc: item.desc3 || '' }
+                { 
+                  name: item.yoga1 || '', 
+                  desc: item.desc1 || '',
+                  imageUrl: item.imageUrl1 || item.imageUrl || 
+                            defaultTerm?.poses.find(dp => dp.name.trim() === (item.yoga1 || '').trim())?.imageUrl ||
+                            defaultTerm?.poses[0]?.imageUrl
+                },
+                { 
+                  name: item.yoga2 || '', 
+                  desc: item.desc2 || '',
+                  imageUrl: item.imageUrl2 || 
+                            defaultTerm?.poses.find(dp => dp.name.trim() === (item.yoga2 || '').trim())?.imageUrl ||
+                            defaultTerm?.poses[1]?.imageUrl
+                },
+                { 
+                  name: item.yoga3 || '', 
+                  desc: item.desc3 || '',
+                  imageUrl: item.imageUrl3 || 
+                            defaultTerm?.poses.find(dp => dp.name.trim() === (item.yoga3 || '').trim())?.imageUrl ||
+                            defaultTerm?.poses[2]?.imageUrl
+                }
               ].filter(p => p.name !== '') // 過濾掉空的動作
             };
           });

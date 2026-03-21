@@ -23,7 +23,7 @@ interface DifficultySettings {
 }
 
 const YOGA_SETTINGS: Record<string, DifficultySettings> = {
-  Beginner: { level: '初階', hands_dist: 0.15, knee_angle: 90, tolerance: 40, grace_time_ms: 1500, threshold_pct: 60 }, // 容許離開 1.5 秒，距離較寬鬆
+  Beginner: { level: '初階', hands_dist: 0.12, knee_angle: 90, tolerance: 30, grace_time_ms: 1500, threshold_pct: 65 }, // 容許離開 1.5 秒，距離較寬鬆
   Intermediate: { level: '中階', hands_dist: 0.10, knee_angle: 90, tolerance: 25, grace_time_ms: 500, threshold_pct: 70 }, // 容許離開 0.5 秒
   Advanced: { level: '高階', hands_dist: 0.05, knee_angle: 90, tolerance: 10, grace_time_ms: 0, threshold_pct: 80 }, // 不容許離開，要求精準
 };
@@ -159,7 +159,13 @@ export default function YogaTreePose({
         cancelAnimationFrame(animationFrameIdRef.current);
       }
 
-      const stream = await navigator.mediaDevices.getUserMedia({
+      // 檢查是否支援 mediaDevices (在某些 Android WebView 或非 HTTPS 環境下會是 undefined)
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error('NotSupportedError');
+      }
+
+      // 加入 Timeout 機制，防止 Android WebView 因為沒有實作 WebChromeClient 而導致 Promise 永遠卡住
+      const getUserMediaPromise = navigator.mediaDevices.getUserMedia({
         video: {
           width: { ideal: 640 },
           height: { ideal: 480 },
@@ -167,6 +173,12 @@ export default function YogaTreePose({
         },
         audio: false
       });
+
+      const timeoutPromise = new Promise<MediaStream>((_, reject) => {
+        setTimeout(() => reject(new Error('TimeoutError')), 8000); // 8秒超時
+      });
+
+      const stream = await Promise.race([getUserMediaPromise, timeoutPromise]);
       
       streamRef.current = stream;
       videoRef.current.srcObject = stream;
@@ -197,7 +209,11 @@ export default function YogaTreePose({
       console.error("Error starting camera:", err);
       setIsStartingCamera(false);
       
-      if (err.name === 'NotAllowedError' || err.message?.includes('Permission denied')) {
+      if (err.message === 'NotSupportedError') {
+        setCameraError('您的應用程式環境不支援相機存取。如果您使用 Android App，請確保 App 已開啟相機權限並支援 WebChromeClient。建議改用手機瀏覽器 (Chrome/Safari) 開啟網頁。');
+      } else if (err.message === 'TimeoutError') {
+        setCameraError('請求相機權限超時。這通常發生在 Android WebView 未正確實作相機權限請求。建議改用手機瀏覽器 (Chrome/Safari) 開啟網頁。');
+      } else if (err.name === 'NotAllowedError' || err.message?.includes('Permission denied')) {
         setCameraError('相機權限被拒絕。請在瀏覽器設定中允許存取相機，然後重試。');
       } else if (err.name === 'NotFoundError') {
         setCameraError('找不到相機設備，請確認您的裝置有可用的鏡頭。');

@@ -3,7 +3,7 @@
     "name": "小寒", "month": 1, "day": 5,
     "meridian": "足少陰腎經", "meridianVessel": "腎經", "meridianSinew": "足少陰之筋",
     "poses": [
-      { "name": "幻椅式", "desc": "固護腎氣，增強下肢力量", "imageUrl": "https://images.unsplash.com/photo-1599901860904-17e6ed7083a0?auto=format&fit=crop&q=80&w=400" },
+      { "name": "幻椅式", "desc": "固護腎氣，增強下肢力量", "imageUrl": "https://i.ibb.co/ZzPntq4X/utkatasana.png" },
       { "name": "站立前彎", "desc": "伸展膀胱經，促進背部血液循環" },
       { "name": "英雄式", "desc": "打開胸腔，提升全身熱能" }
     ]
@@ -21,7 +21,7 @@
     "name": "立春", "month": 2, "day": 4,
     "meridian": "足厥陰肝經", "meridianVessel": "肝經", "meridianSinew": "足厥陰之筋",
     "poses": [
-      { "name": "樹式", "desc": "春屬木，如樹木般扎根生長，疏肝理氣", "imageUrl": "https://ibb.co/W4YGMZFx" },
+      { "name": "樹式", "desc": "春屬木，如樹木般扎根生長，疏肝理氣", "imageUrl": "https://i.ibb.co/LX2Ycm6k/tree-pose.png" },
       { "name": "摩天式", "desc": "向上伸展，順應春氣生發" },
       { "name": "鷹式", "desc": "擠壓關節，促進氣血循環" }
     ]
@@ -48,7 +48,7 @@
     "name": "春分", "month": 3, "day": 20,
     "meridian": "足厥陰肝經", "meridianVessel": "肝經", "meridianSinew": "足厥陰之筋",
     "poses": [
-      { "name": "樹式", "desc": "陰陽平衡，平心靜氣", "imageUrl": "https://ibb.co/W4YGMZFx" },
+      { "name": "樹式", "desc": "陰陽平衡，平心靜氣", "imageUrl": "https://i.ibb.co/LX2Ycm6k/tree-pose.png" },
       { "name": "門閂式", "desc": "伸展側腰，疏通肝膽經絡" },
       { "name": "三角式", "desc": "穩定下盤，平衡左右能量" }
     ]
