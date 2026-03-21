@@ -25,6 +25,7 @@ const QUESTIONS = [
 ];
 
 export default function MiniGame() {
+  const [activeTab, setActiveTab] = useState<'game1' | 'game2' | 'qa'>('game1');
   const [currentQ, setCurrentQ] = useState(0);
   const [score, setScore] = useState(0);
   const [showResult, setShowResult] = useState(false);
@@ -58,7 +59,7 @@ export default function MiniGame() {
   return (
     <div className="flex flex-col items-center w-full min-h-screen bg-stone-50 pb-10">
       {/* Header */}
-      <div className="w-full bg-purple-700 text-white p-6 rounded-b-3xl shadow-md mb-6 relative">
+      <div className="w-full bg-purple-700 text-white p-6 rounded-b-3xl shadow-md mb-6 relative shrink-0">
         <Link to="/" className="absolute top-6 left-6 text-white/80 hover:text-white">
           <ArrowLeft className="w-6 h-6" />
         </Link>
@@ -66,11 +67,53 @@ export default function MiniGame() {
           <Gamepad2 className="w-6 h-6" />
           YOGA24 小遊戲
         </h1>
-        <p className="text-purple-100 text-sm">測試你的節氣與瑜珈知識！</p>
+        <p className="text-purple-100 text-sm">體驗互動式遊戲與知識問答！</p>
       </div>
 
-      <div className="w-full px-6 flex flex-col gap-6">
-        {!showResult ? (
+      <div className="w-full px-6 flex flex-col gap-6 flex-1">
+        {/* Tabs */}
+        <div className="flex w-full max-w-md mx-auto bg-stone-200 rounded-xl p-1 shrink-0">
+          <button
+            onClick={() => setActiveTab('game1')}
+            className={`flex-1 py-2 text-sm font-bold rounded-lg transition-colors ${activeTab === 'game1' ? 'bg-white text-purple-700 shadow-sm' : 'text-stone-500 hover:text-stone-700'}`}
+          >
+            互動遊戲 1
+          </button>
+          <button
+            onClick={() => setActiveTab('game2')}
+            className={`flex-1 py-2 text-sm font-bold rounded-lg transition-colors ${activeTab === 'game2' ? 'bg-white text-purple-700 shadow-sm' : 'text-stone-500 hover:text-stone-700'}`}
+          >
+            互動遊戲 2
+          </button>
+          <button
+            onClick={() => setActiveTab('qa')}
+            className={`flex-1 py-2 text-sm font-bold rounded-lg transition-colors ${activeTab === 'qa' ? 'bg-white text-purple-700 shadow-sm' : 'text-stone-500 hover:text-stone-700'}`}
+          >
+            知識問答
+          </button>
+        </div>
+
+        {activeTab === 'game1' ? (
+          <div className="w-full flex-1 relative bg-black rounded-2xl overflow-hidden shadow-inner min-h-[60vh]">
+            <iframe 
+              src="/game1/index.html" 
+              className="w-full h-full absolute inset-0 border-0"
+              title="YOGA24 HTML Game 1"
+              allow="camera; microphone; fullscreen; autoplay"
+            />
+          </div>
+        ) : activeTab === 'game2' ? (
+          <div className="w-full flex-1 relative bg-black rounded-2xl overflow-hidden shadow-inner min-h-[60vh]">
+            <iframe 
+              src="/game2/index.html" 
+              className="w-full h-full absolute inset-0 border-0"
+              title="YOGA24 HTML Game 2"
+              allow="camera; microphone; fullscreen; autoplay"
+            />
+          </div>
+        ) : (
+          <>
+            {!showResult ? (
           <motion.div 
             key={currentQ}
             initial={{ opacity: 0, x: 20 }}
@@ -146,6 +189,8 @@ export default function MiniGame() {
               <RefreshCw className="w-5 h-5" /> 再玩一次
             </button>
           </motion.div>
+        )}
+          </>
         )}
       </div>
     </div>

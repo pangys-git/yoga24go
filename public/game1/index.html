@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>瑜伽大師 - 動作模擬挑戰</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #f0fdf4;
+            touch-action: none; /* 防止手機端拖曳時發生頁面捲動 */
+        }
+        #gameCanvas {
+            background: linear-gradient(to bottom, #e0f2fe 0%, #fffbeb 70%, #dcfce7 100%);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            border-radius: 1rem;
+            width: 100%;
+            max-width: 500px;
+            aspect-ratio: 1 / 1;
+            cursor: grab;
+        }
+        #gameCanvas:active {
+            cursor: grabbing;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+        }
+        /* 慶祝動畫 */
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .animate-pop {
+            animation: pop 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans text-gray-800">
+
+    <!-- 頂部標題與說明 -->
+    <header class="p-4 md:p-6 text-center">
+        <h1 class="text-3xl md:text-4xl font-bold text-green-700 mb-2">🧘 瑜伽大師 - 動作模擬挑戰</h1>
+        <p class="text-gray-600">拉動人仔的圓形關節，盡量與半透明的目標動作重疊！</p>
+        <div class="flex justify-center gap-4 mt-3 text-sm font-medium">
+            <span class="flex items-center"><span class="w-3 h-3 rounded-full bg-orange-500 mr-1"></span> 左側肢體</span>
+            <span class="flex items-center"><span class="w-3 h-3 rounded-full bg-blue-500 mr-1"></span> 右側肢體</span>
+        </div>
+    </header>
+
+    <!-- 遊戲主要區域 -->
+    <main class="flex-1 max-w-5xl mx-auto w-full p-4 flex flex-col md:flex-row gap-6 items-center justify-center">
+        
+        <!-- 左側：關卡資訊與分數 -->
+        <div class="glass-panel w-full md:w-80 rounded-2xl p-6 shadow-lg flex flex-col h-full border border-white">
+            <div class="mb-4">
+                <span class="bg-green-100 text-green-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">第 <span id="level-indicator">1</span> 關</span>
+            </div>
+            <h2 id="pose-name" class="text-2xl font-bold text-gray-800 mb-3">載入中...</h2>
+            <p id="pose-desc" class="text-gray-600 flex-1 leading-relaxed">...</p>
+            
+            <div class="mt-8 text-center bg-gray-50 rounded-xl p-4 border border-gray-100">
+                <p class="text-sm text-gray-500 mb-1 font-semibold">動作相似度</p>
+                <div class="text-5xl font-black text-gray-800 transition-colors duration-300" id="score-display">0%</div>
+                
+                <!-- 進度條 -->
+                <div class="w-full bg-gray-200 rounded-full h-3 mt-4 overflow-hidden">
+                    <div id="score-bar" class="bg-blue-500 h-3 rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <button id="next-btn" class="mt-6 w-full py-4 rounded-xl font-bold text-lg text-white bg-gray-300 cursor-not-allowed transition-all duration-300 shadow-sm" disabled>
+                達標 85% 以解鎖下一關
+            </button>
+        </div>
+
+        <!-- 右側：遊戲畫布 -->
+        <div class="relative flex justify-center w-full max-w-[500px]">
+            <canvas id="gameCanvas" width="500" height="500"></canvas>
+            
+            <!-- 成功提示 -->
+            <div id="success-overlay" class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-0 transition-opacity duration-300">
+                <div class="bg-green-500 text-white px-8 py-4 rounded-full font-bold text-2xl shadow-xl transform scale-90 transition-transform duration-300" id="success-badge">
+                    ✨ 完美動作！
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // --- 瑜伽關卡資料定義 ---
+        // 每個動作包含名稱、介紹，以及 15 個目標關節點的座標 (X, Y)
+        const levels = [
+            {
+                name: "樹式 (Tree Pose)",
+                desc: "訓練平衡感的基礎動作。將一隻腳平放在另一條腿的大腿內側，雙手合十舉過頭頂，保持脊椎挺直。",
+                target: [
+                    [250, 80],   // 0: Head
+                    [250, 120],  // 1: Neck
+                    [210, 120],  // 2: L_Shoulder
+                    [290, 120],  // 3: R_Shoulder
+                    [190, 60],   // 4: L_Elbow
+                    [310, 60],   // 5: R_Elbow
+                    [250, 30],   // 6: L_Hand
+                    [250, 30],   // 7: R_Hand
+                    [250, 240],  // 8: Pelvis
+                    [220, 240],  // 9: L_Hip
+                    [280, 240],  // 10: R_Hip
+                    [160, 300],  // 11: L_Knee (Bent out)
+                    [280, 340],  // 12: R_Knee (Straight)
+                    [260, 370],  // 13: L_Foot (Resting on R knee)
+                    [280, 440]   // 14: R_Foot
+                ]
+            },
+            {
+                name: "戰士二式 (Warrior II)",
+                desc: "增強腿部力量並打開髖部。雙腳寬距分開，前腿屈膝90度，雙臂向兩側平舉，目光注視前方手指。",
+                target: [
+                    [250, 120],  // Head
+                    [250, 160],  // Neck
+                    [210, 160],  // L_Shoulder
+                    [290, 160],  // R_Shoulder
+                    [150, 160],  // L_Elbow
+                    [350, 160],  // R_Elbow
+                    [90, 160],   // L_Hand
+                    [410, 160],  // R_Hand
+                    [250, 280],  // Pelvis
+                    [220, 280],  // L_Hip
+                    [280, 280],  // R_Hip
+                    [160, 350],  // L_Knee (Bent)
+                    [360, 350],  // R_Knee (Straight)
+                    [160, 440],  // L_Foot
+                    [420, 440]   // R_Foot
+                ]
+            },
+            {
+                name: "下犬式 (Downward Dog)",
+                desc: "全身伸展的經典動作。雙手雙腳撐地，臀部高舉，身體形成一個倒V字型，背部保持平直。",
+                target: [
+                    [250, 360],  // Head
+                    [250, 330],  // Neck
+                    [220, 320],  // L_Shoulder
+                    [280, 320],  // R_Shoulder
+                    [190, 380],  // L_Elbow
+                    [310, 380],  // R_Elbow
+                    [150, 440],  // L_Hand (Floor)
+                    [350, 440],  // R_Hand (Floor)
+                    [250, 180],  // Pelvis (High up)
+                    [230, 190],  // L_Hip
+                    [270, 190],  // R_Hip
+                    [210, 310],  // L_Knee
+                    [290, 310],  // R_Knee
+                    [180, 440],  // L_Foot (Floor)
+                    [320, 440]   // R_Foot (Floor)
+                ]
+            },
+            {
+                name: "船式 (Boat Pose)",
+                desc: "強化核心肌群。坐在地上，雙腿併攏抬起，身體微微後傾呈V字型，雙臂向前平伸。",
+                target: [
+                    [180, 230],  // Head
+                    [200, 270],  // Neck
+                    [180, 290],  // L_Shoulder
+                    [220, 290],  // R_Shoulder
+                    [240, 280],  // L_Elbow
+                    [280, 280],  // R_Elbow
+                    [300, 270],  // L_Hand
+                    [340, 270],  // R_Hand
+                    [250, 380],  // Pelvis (Floor)
+                    [240, 360],  // L_Hip
+                    [260, 360],  // R_Hip
+                    [310, 300],  // L_Knee
+                    [330, 300],  // R_Knee
+                    [360, 230],  // L_Foot
+                    [380, 230]   // R_Foot
+                ]
+            }
+        ];
+
+        // --- 常數與物理設定 ---
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const BONE_WIDTH = 12;
+        const JOINT_RADIUS = 12;
+        
+        // 14 根骨骼的連接方式 [點1, 點2]
+        const boneDefinitions = [
+            [0,1], [1,2], [1,3], [2,4], [4,6], [3,5], [5,7], 
+            [1,8], [8,9], [8,10], [9,11], [11,13], [10,12], [12,14]
+        ];
+
+        // 骨骼顏色配置 (灰:中心軀幹, 橙:左邊, 藍:右邊)
+        const BONE_COLORS = [
+            '#4b5563', '#f97316', '#3b82f6', '#f97316', '#f97316', '#3b82f6', '#3b82f6',
+            '#4b5563', '#f97316', '#3b82f6', '#f97316', '#f97316', '#3b82f6', '#3b82f6'
+        ];
+
+        // 遊戲狀態
+        let currentLevel = 0;
+        let points = [];
+        let bones = [];
+        let targetAngles = [];
+        let isDragging = false;
+        let draggedPoint = null;
+        let currentSimilarity = 0;
+        let levelCompleted = false;
+
+        // 初始化中性站立姿勢（用於開始遊戲或重置）
+        const neutralPose = [
+            [250, 100], [250, 140], [210, 140], [290, 140], [150, 140], [350, 140], 
+            [90, 140], [410, 140], [250, 260], [220, 260], [280, 260], [220, 360], 
+            [280, 360], [220, 460], [280, 460]
+        ];
+
+        // --- 核心物件類別 ---
+        class Point {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.oldX = x;
+                this.oldY = y;
+                this.isDragging = false;
+            }
+        }
+
+        class Bone {
+            constructor(p1Index, p2Index, color) {
+                this.p1Index = p1Index;
+                this.p2Index = p2Index;
+                // 計算並鎖定初始骨骼長度
+                let dx = neutralPose[p2Index][0] - neutralPose[p1Index][0];
+                let dy = neutralPose[p2Index][1] - neutralPose[p1Index][1];
+                this.length = Math.sqrt(dx*dx + dy*dy);
+                this.color = color;
+            }
+        }
+
+        // --- 邏輯函數 ---
+        
+        // 載入關卡
+        function loadLevel(index) {
+            if (index >= levels.length) {
+                alert("恭喜！你已完成所有瑜伽挑戰！");
+                index = 0;
+            }
+            currentLevel = index;
+            const levelData = levels[currentLevel];
+            
+            document.getElementById('level-indicator').innerText = currentLevel + 1;
+            document.getElementById('pose-name').innerText = levelData.name;
+            document.getElementById('pose-desc').innerText = levelData.desc;
+            
+            // 重置UI
+            levelCompleted = false;
+            document.getElementById('success-overlay').classList.remove('opacity-100');
+            document.getElementById('success-overlay').classList.add('opacity-0');
+            document.getElementById('success-badge').classList.remove('scale-100');
+            document.getElementById('success-badge').classList.add('scale-90');
+            
+            const btn = document.getElementById('next-btn');
+            btn.disabled = true;
+            btn.className = "mt-6 w-full py-4 rounded-xl font-bold text-lg text-white bg-gray-300 cursor-not-allowed transition-all duration-300 shadow-sm";
+            btn.innerText = "達標 85% 以解鎖下一關";
+
+            // 重建物理實體
+            points = neutralPose.map(pos => new Point(pos[0], pos[1]));
+            bones = boneDefinitions.map((def, i) => new Bone(def[0], def[1], BONE_COLORS[i]));
+
+            // 計算目標動作的骨骼角度，作為計分基準
+            targetAngles = boneDefinitions.map(def => {
+                let dx = levelData.target[def[1]][0] - levelData.target[def[0]][0];
+                let dy = levelData.target[def[1]][1] - levelData.target[def[0]][1];
+                return Math.atan2(dy, dx);
+            });
+        }
+
+        // 更新物理約束 (Verlet Integration)
+        function updatePhysics() {
+            // 點的運動 (無重力，僅保存動量以保持流暢)
+            points.forEach(p => {
+                if (!p.isDragging) {
+                    let vx = (p.x - p.oldX) * 0.8; // 摩擦力
+                    let vy = (p.y - p.oldY) * 0.8;
+                    p.oldX = p.x;
+                    p.oldY = p.y;
+                    p.x += vx;
+                    p.y += vy;
+                    
+                    // 邊界限制
+                    p.x = Math.max(JOINT_RADIUS, Math.min(canvas.width - JOINT_RADIUS, p.x));
+                    p.y = Math.max(JOINT_RADIUS, Math.min(canvas.height - JOINT_RADIUS, p.y));
+                }
+            });
+
+            // 骨骼長度約束 (迭代多次使身體更堅挺)
+            for (let i = 0; i < 15; i++) {
+                bones.forEach(b => {
+                    let p1 = points[b.p1Index];
+                    let p2 = points[b.p2Index];
+                    let dx = p2.x - p1.x;
+                    let dy = p2.y - p1.y;
+                    let dist = Math.sqrt(dx*dx + dy*dy);
+                    if (dist === 0) return;
+                    
+                    let diff = b.length - dist;
+                    let percent = diff / dist / 2;
+                    let offsetX = dx * percent;
+                    let offsetY = dy * percent;
+
+                    if (!p1.isDragging) { p1.x -= offsetX; p1.y -= offsetY; }
+                    if (!p2.isDragging) { p2.x += offsetX; p2.y += offsetY; }
+                });
+            }
+        }
+
+        // 計算相似度分數
+        function calculateScore() {
+            let totalScore = 0;
+            
+            bones.forEach((b, i) => {
+                let p1 = points[b.p1Index];
+                let p2 = points[b.p2Index];
+                let currentAngle = Math.atan2(p2.y - p1.y, p2.x - p1.x);
+                let tAngle = targetAngles[i];
+                
+                // 計算角度差異，將其限制在 0 到 PI 之間
+                let diff = Math.abs(currentAngle - tAngle);
+                while (diff > Math.PI) diff = 2 * Math.PI - diff;
+                
+                // 容錯率設計：100度 (約1.75弧度) 以上差異為 0 分
+                let boneScore = Math.max(0, 100 * (1 - (diff / 1.75)));
+                totalScore += boneScore;
+            });
+
+            // 取平均並平滑過渡數值
+            let targetSimilarity = Math.floor(totalScore / bones.length);
+            currentSimilarity += (targetSimilarity - currentSimilarity) * 0.1;
+            
+            updateUI(currentSimilarity);
+        }
+
+        // 更新UI顯示
+        function updateUI(sim) {
+            let displayScore = Math.round(sim);
+            const scoreDisplay = document.getElementById('score-display');
+            const scoreBar = document.getElementById('score-bar');
+            
+            scoreDisplay.innerText = displayScore + "%";
+            scoreBar.style.width = displayScore + "%";
+
+            // 顏色變化
+            if (displayScore >= 85) {
+                scoreDisplay.className = "text-5xl font-black text-green-600 transition-colors duration-300";
+                scoreBar.className = "bg-green-500 h-3 rounded-full transition-all duration-300";
+                
+                if (!levelCompleted) {
+                    levelCompleted = true;
+                    // 解鎖下一關
+                    const btn = document.getElementById('next-btn');
+                    btn.disabled = false;
+                    btn.className = "mt-6 w-full py-4 rounded-xl font-bold text-lg text-white bg-green-500 hover:bg-green-600 cursor-pointer transition-all duration-300 shadow-lg transform hover:-translate-y-1 animate-pop";
+                    btn.innerText = "⭐ 完美！前往下一關 ⭐";
+                    
+                    // 顯示成功動畫
+                    document.getElementById('success-overlay').classList.remove('opacity-0');
+                    document.getElementById('success-overlay').classList.add('opacity-100');
+                    document.getElementById('success-badge').classList.remove('scale-90');
+                    document.getElementById('success-badge').classList.add('scale-100');
+                    setTimeout(() => {
+                        document.getElementById('success-overlay').classList.add('opacity-0');
+                    }, 2000);
+                }
+            } else if (displayScore >= 50) {
+                scoreDisplay.className = "text-5xl font-black text-orange-500 transition-colors duration-300";
+                scoreBar.className = "bg-orange-500 h-3 rounded-full transition-all duration-300";
+            } else {
+                scoreDisplay.className = "text-5xl font-black text-gray-800 transition-colors duration-300";
+                scoreBar.className = "bg-blue-500 h-3 rounded-full transition-all duration-300";
+            }
+        }
+
+        // 渲染畫面
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 畫地板線
+            ctx.beginPath();
+            ctx.moveTo(0, 460);
+            ctx.lineTo(500, 460);
+            ctx.strokeStyle = "rgba(0,0,0,0.1)";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // 1. 畫目標動作 (半透明影子)
+            const targetData = levels[currentLevel].target;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.globalAlpha = 0.25;
+            
+            boneDefinitions.forEach((def, i) => {
+                ctx.beginPath();
+                ctx.moveTo(targetData[def[0]][0], targetData[def[0]][1]);
+                ctx.lineTo(targetData[def[1]][0], targetData[def[1]][1]);
+                ctx.strokeStyle = BONE_COLORS[i];
+                ctx.lineWidth = BONE_WIDTH + 4;
+                ctx.stroke();
+            });
+            // 目標頭部
+            ctx.beginPath();
+            ctx.arc(targetData[0][0], targetData[0][1], JOINT_RADIUS + 5, 0, Math.PI * 2);
+            ctx.fillStyle = BONE_COLORS[0];
+            ctx.fill();
+
+            // 2. 畫玩家控制的人仔
+            ctx.globalAlpha = 1.0;
+            
+            // 畫骨骼
+            bones.forEach(b => {
+                let p1 = points[b.p1Index];
+                let p2 = points[b.p2Index];
+                ctx.beginPath();
+                ctx.moveTo(p1.x, p1.y);
+                ctx.lineTo(p2.x, p2.y);
+                ctx.strokeStyle = levelCompleted ? '#22c55e' : b.color; // 成功時變綠
+                ctx.lineWidth = BONE_WIDTH;
+                ctx.stroke();
+            });
+
+            // 畫關節點
+            points.forEach((p, index) => {
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, JOINT_RADIUS, 0, Math.PI * 2);
+                ctx.fillStyle = levelCompleted ? '#dcfce7' : '#ffffff';
+                ctx.fill();
+                ctx.lineWidth = 3;
+                
+                // 決定邊框顏色
+                let strokeColor = '#4b5563';
+                if(index === 2 || index === 4 || index === 6 || index === 9 || index === 11 || index === 13) strokeColor = '#f97316';
+                if(index === 3 || index === 5 || index === 7 || index === 10 || index === 12 || index === 14) strokeColor = '#3b82f6';
+                
+                ctx.strokeStyle = levelCompleted ? '#16a34a' : strokeColor;
+                ctx.stroke();
+                
+                // 頭部特別畫大一點
+                if (index === 0) {
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, JOINT_RADIUS + 6, 0, Math.PI * 2);
+                    ctx.fillStyle = levelCompleted ? '#16a34a' : strokeColor;
+                    ctx.fill();
+                }
+            });
+        }
+
+        // 主遊戲迴圈
+        function gameLoop() {
+            updatePhysics();
+            calculateScore();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // --- 互動事件處理 ---
+        
+        // 取得相對於 Canvas 的準確座標 (支援 CSS 縮放)
+        function getPointerPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            
+            let clientX = e.clientX;
+            let clientY = e.clientY;
+            
+            if (e.touches && e.touches.length > 0) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            }
+
+            return {
+                x: (clientX - rect.left) * scaleX,
+                y: (clientY - rect.top) * scaleY
+            };
+        }
+
+        function handleStart(e) {
+            if(e.cancelable) e.preventDefault(); // 防止滾動
+            const pos = getPointerPos(e);
+            
+            // 尋找最近的關節點
+            let closestDist = JOINT_RADIUS * 3; // 判定範圍放大一點方便點擊
+            let closestPoint = null;
+            
+            points.forEach(p => {
+                let dx = p.x - pos.x;
+                let dy = p.y - pos.y;
+                let dist = Math.sqrt(dx*dx + dy*dy);
+                if (dist < closestDist) {
+                    closestDist = dist;
+                    closestPoint = p;
+                }
+            });
+
+            if (closestPoint) {
+                isDragging = true;
+                draggedPoint = closestPoint;
+                draggedPoint.isDragging = true;
+                draggedPoint.oldX = draggedPoint.x;
+                draggedPoint.oldY = draggedPoint.y;
+            }
+        }
+
+        function handleMove(e) {
+            if (!isDragging || !draggedPoint) return;
+            if(e.cancelable) e.preventDefault();
+            
+            const pos = getPointerPos(e);
+            draggedPoint.x = pos.x;
+            draggedPoint.y = pos.y;
+            // 更新 old 以免放開時產生過大慣性速度
+            draggedPoint.oldX = pos.x; 
+            draggedPoint.oldY = pos.y;
+        }
+
+        function handleEnd(e) {
+            if(e.cancelable) e.preventDefault();
+            if (draggedPoint) {
+                draggedPoint.isDragging = false;
+                draggedPoint = null;
+            }
+            isDragging = false;
+        }
+
+        // 綁定滑鼠事件
+        canvas.addEventListener('mousedown', handleStart);
+        window.addEventListener('mousemove', handleMove);
+        window.addEventListener('mouseup', handleEnd);
+
+        // 綁定觸控事件
+        canvas.addEventListener('touchstart', handleStart, { passive: false });
+        window.addEventListener('touchmove', handleMove, { passive: false });
+        window.addEventListener('touchend', handleEnd, { passive: false });
+
+        // 下一關按鈕
+        document.getElementById('next-btn').addEventListener('click', () => {
+            if (levelCompleted) {
+                loadLevel(currentLevel + 1);
+            }
+        });
+
+        // 啟動遊戲
+        loadLevel(0);
+        gameLoop();
+
+    </script>
+</body>
+</html>

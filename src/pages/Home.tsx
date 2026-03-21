@@ -8,6 +8,12 @@ export default function Home() {
     <div className="flex flex-col items-center w-full min-h-screen bg-stone-50 pb-10">
       {/* Header */}
       <div className="w-full bg-emerald-700 text-white p-8 rounded-b-3xl shadow-md mb-8 flex flex-col items-center text-center">
+        <img 
+          src="https://i.ibb.co/qLmd8PGf/logo-yoga.png" 
+          alt="YOGA24GO Logo" 
+          className="w-28 h-28 object-contain mb-4 drop-shadow-md"
+          referrerPolicy="no-referrer"
+        />
         <h1 className="text-4xl font-bold mb-3 tracking-tight">YOGA24GO</h1>
         <p className="text-emerald-100 text-sm leading-relaxed max-w-sm">
           結合二十四節氣與瑜珈練習，順應自然，調養身心。

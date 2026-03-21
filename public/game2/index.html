@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>二十四節氣卡牌記憶遊戲 (Canvas 版)</title>
+    <style>
+        :root {
+            --primary: #2b6cb0;
+            --bg-color: #ebf4ff;
+            --text-color: #2d3748;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'PingFang HK', 'Microsoft JhengHei', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden; /* 防止滾動 */
+        }
+
+        header {
+            text-align: center;
+            padding: 10px 0;
+            width: 100%;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            z-index: 10;
+        }
+
+        h1 {
+            margin: 5px 0;
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-top: 5px;
+        }
+
+        .score-board {
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background-color: #2c5282;
+        }
+
+        #game-container {
+            flex: 1;
+            width: 100%;
+            max-width: 1000px;
+            position: relative;
+            padding: 10px;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        canvas {
+            display: block;
+            background-color: transparent;
+            /* 禁用選取和觸控高亮，提升遊戲體驗 */
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            cursor: pointer;
+        }
+
+        /* 遊戲開始前的遮罩，用於觸發語音權限 */
+        #start-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+        }
+
+        #start-overlay button {
+            font-size: 1.5rem;
+            padding: 15px 30px;
+            border-radius: 50px;
+            box-shadow: 0 4px 6px rgba(43, 108, 176, 0.3);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>二十四節氣配對遊戲</h1>
+        <div class="controls">
+            <div class="score-board">已配對: <span id="score">0</span> / 24</div>
+            <button id="restart-btn">重新洗牌</button>
+        </div>
+    </header>
+
+    <div id="game-container">
+        <canvas id="gameCanvas"></canvas>
+        <div id="start-overlay">
+            <h2>準備好學習二十四節氣了嗎？</h2>
+            <p>提示：請開啟聲音以聆聽廣東話教學</p>
+            <button id="start-btn">開始遊戲</button>
+        </div>
+    </div>
+
+    <script>
+        // 二十四節氣數據 (加入 Emoji 作為圖案)
+        const solarTerms = [
+            { id: 0, name: "立春", emoji: "🌱", speech: "立春，春天嘅開始。" },
+            { id: 1, name: "雨水", emoji: "🌧️", speech: "雨水，雨水開始變多。" },
+            { id: 2, name: "驚蟄", emoji: "🐛", speech: "驚蟄，春雷驚醒蟲仔。" },
+            { id: 3, name: "春分", emoji: "⚖️", speech: "春分，晝夜一樣長。" },
+            { id: 4, name: "清明", emoji: "🌼", speech: "清明，踏青祭祖嘅時候。" },
+            { id: 5, name: "穀雨", emoji: "🌾", speech: "穀雨，雨水滋潤農作物。" },
+            { id: 6, name: "立夏", emoji: "☀️", speech: "立夏，夏天嘅開始。" },
+            { id: 7, name: "小滿", emoji: "🌿", speech: "小滿，穀物開始飽滿。" },
+            { id: 8, name: "芒種", emoji: "🌽", speech: "芒種，忙於耕種嘅季節。" },
+            { id: 9, name: "夏至", emoji: "🌞", speech: "夏至，一年中日光最長。" },
+            { id: 10, name: "小暑", emoji: "🍧", speech: "小暑，天氣開始熱。" },
+            { id: 11, name: "大暑", emoji: "🥵", speech: "大暑，最熱嘅日子。" },
+            { id: 12, name: "立秋", emoji: "🍂", speech: "立秋，秋天嘅開始。" },
+            { id: 13, name: "處暑", emoji: "🎐", speech: "處暑，暑氣逐漸消退。" },
+            { id: 14, name: "白露", emoji: "💧", speech: "白露，露水變得潔白。" },
+            { id: 15, name: "秋分", emoji: "🍁", speech: "秋分，日夜再次平分。" },
+            { id: 16, name: "寒露", emoji: "🧣", speech: "寒露，露水開始變凍。" },
+            { id: 17, name: "霜降", emoji: "❄️", speech: "霜降，天氣轉冷，有霜。" },
+            { id: 18, name: "立冬", emoji: "⛄", speech: "立冬，冬天嘅開始。" },
+            { id: 19, name: "小雪", emoji: "🌨️", speech: "小雪，開始落少量雪。" },
+            { id: 20, name: "大雪", emoji: "☃️", speech: "大雪，雪量變大。" },
+            { id: 21, name: "冬至", emoji: "🥟", speech: "冬至，一年中日光最短。" },
+            { id: 22, name: "小寒", emoji: "🥶", speech: "小寒，天氣開始好凍。" },
+            { id: 23, name: "大寒", emoji: "🧊", speech: "大寒，最凍嘅日子。" }
+        ];
+
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('game-container');
+        const scoreEl = document.getElementById('score');
+        
+        // 遊戲狀態
+        let cards = [];
+        let flippedCards = [];
+        let matchedPairs = 0;
+        let isLocked = false;
+        let cantoneseVoice = null;
+        
+        // 版面配置
+        let cols = 8;
+        let rows = 6;
+        let cardWidth = 0;
+        let cardHeight = 0;
+        const gap = 10;
+        const margin = 10;
+
+        // 初始化語音 (尋找廣東話)
+        function initSpeech() {
+            const setVoice = () => {
+                const voices = speechSynthesis.getVoices();
+                cantoneseVoice = voices.find(v => v.lang.includes('HK') || v.lang.includes('Cantonese')) || voices[0];
+            };
+            if (speechSynthesis.onvoiceschanged !== undefined) {
+                speechSynthesis.onvoiceschanged = setVoice;
+            }
+            setVoice();
+        }
+
+        function speak(text) {
+            if ('speechSynthesis' in window) {
+                speechSynthesis.cancel(); // 停止上一句
+                const utterance = new SpeechSynthesisUtterance(text);
+                if (cantoneseVoice) utterance.voice = cantoneseVoice;
+                utterance.rate = 0.9;
+                speechSynthesis.speak(utterance);
+            }
+        }
+
+        // 調整 Canvas 大小並計算卡牌佈局
+        function resizeAndLayout() {
+            // 獲取容器實際可用大小
+            const rect = container.getBoundingClientRect();
+            // 處理高 DPI 螢幕 (Retina) 讓字體圖案更清晰
+            const dpr = window.devicePixelRatio || 1;
+            
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            canvas.style.width = `${rect.width}px`;
+            canvas.style.height = `${rect.height}px`;
+            
+            ctx.scale(dpr, dpr);
+
+            // 根據橫向或直向決定行列數 (確保 48 張牌能放下)
+            if (rect.width < rect.height) {
+                cols = 6; rows = 8; // 直向手機
+            } else {
+                cols = 8; rows = 6; // 橫向/電腦
+            }
+
+            // 計算單張卡牌尺寸
+            const totalGapX = gap * (cols - 1) + margin * 2;
+            const totalGapY = gap * (rows - 1) + margin * 2;
+            cardWidth = (rect.width - totalGapX) / cols;
+            cardHeight = (rect.height - totalGapY) / rows;
+
+            // 更新現有卡牌的坐標
+            updateCardPositions();
+            drawBoard();
+        }
+
+        // 初始化遊戲數據
+        function initGame() {
+            // 生成 48 張牌 (兩套 24 節氣)
+            let deck = [...solarTerms, ...solarTerms];
+            // 洗牌 (Fisher-Yates)
+            for (let i = deck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [deck[i], deck[j]] = [deck[j], deck[i]];
+            }
+
+            cards = deck.map((term, index) => ({
+                id: index,
+                termId: term.id,
+                termData: term,
+                isFlipped: false,
+                isMatched: false,
+                x: 0, y: 0 // 會在 resizeAndLayout 中計算
+            }));
+
+            matchedPairs = 0;
+            flippedCards = [];
+            isLocked = false;
+            scoreEl.innerText = matchedPairs;
+            
+            resizeAndLayout();
+        }
+
+        // 計算每張卡牌的 x, y 坐標
+        function updateCardPositions() {
+            cards.forEach((card, index) => {
+                const col = index % cols;
+                const row = Math.floor(index / cols);
+                card.x = margin + col * (cardWidth + gap);
+                card.y = margin + row * (cardHeight + gap);
+            });
+        }
+
+        // 繪製圓角矩形輔助函數
+        function roundRect(ctx, x, y, width, height, radius) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            ctx.lineTo(x + radius, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+        }
+
+        // 繪製遊戲板面
+        function drawBoard() {
+            // 清空畫布
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            cards.forEach(card => {
+                if (card.isMatched) {
+                    // 已配對：畫一個半透明的正面
+                    ctx.save();
+                    ctx.globalAlpha = 0.5;
+                    drawCardFront(card);
+                    // 加上綠色邊框表示成功
+                    ctx.lineWidth = 3;
+                    ctx.strokeStyle = '#48bb78';
+                    roundRect(ctx, card.x, card.y, cardWidth, cardHeight, 8);
+                    ctx.stroke();
+                    ctx.restore();
+                } else if (card.isFlipped) {
+                    // 翻開：畫正面
+                    drawCardFront(card);
+                } else {
+                    // 蓋上：畫背面
+                    drawCardBack(card);
+                }
+            });
+        }
+
+        function drawCardBack(card) {
+            ctx.save();
+            roundRect(ctx, card.x, card.y, cardWidth, cardHeight, 8);
+            
+            // 背景漸變
+            const gradient = ctx.createLinearGradient(card.x, card.y, card.x, card.y + cardHeight);
+            gradient.addColorStop(0, '#4299e1');
+            gradient.addColorStop(1, '#2b6cb0');
+            ctx.fillStyle = gradient;
+            ctx.fill();
+            
+            // 陰影
+            ctx.shadowColor = 'rgba(0,0,0,0.2)';
+            ctx.shadowBlur = 4;
+            ctx.shadowOffsetY = 2;
+            
+            // 繪製背面圖案/文字
+            ctx.fillStyle = 'rgba(255,255,255,0.3)';
+            ctx.font = `bold ${cardHeight * 0.4}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('?', card.x + cardWidth/2, card.y + cardHeight/2);
+            
+            // 繪製白色細邊框
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = 'white';
+            ctx.stroke();
+            
+            ctx.restore();
+        }
+
+        function drawCardFront(card) {
+            ctx.save();
+            
+            // 繪製白色卡片底
+            roundRect(ctx, card.x, card.y, cardWidth, cardHeight, 8);
+            ctx.fillStyle = '#ffffff';
+            ctx.shadowColor = 'rgba(0,0,0,0.15)';
+            ctx.shadowBlur = 4;
+            ctx.shadowOffsetY = 2;
+            ctx.fill();
+
+            ctx.shadowColor = 'transparent'; // 關閉文字/Emoji的陰影
+
+            // 繪製 Emoji
+            const emojiSize = Math.min(cardWidth, cardHeight) * 0.4;
+            ctx.font = `${emojiSize}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(card.termData.emoji, card.x + cardWidth/2, card.y + cardHeight/2 - 10);
+
+            // 繪製節氣文字
+            const fontSize = Math.min(cardWidth, cardHeight) * 0.2;
+            ctx.fillStyle = '#2d3748';
+            ctx.font = `bold ${fontSize}px "PingFang HK", "Microsoft JhengHei", sans-serif`;
+            ctx.fillText(card.termData.name, card.x + cardWidth/2, card.y + cardHeight - 15);
+
+            // 藍色邊框
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#2b6cb0';
+            ctx.stroke();
+
+            ctx.restore();
+        }
+
+        // 處理點擊/觸控事件
+        function handleInteraction(clientX, clientY) {
+            if (isLocked) return;
+
+            const rect = canvas.getBoundingClientRect();
+            // 換算回 Canvas 內部坐標
+            const x = clientX - rect.left;
+            const y = clientY - rect.top;
+
+            // 尋找被點擊的卡牌
+            let clickedCard = null;
+            for (let i = 0; i < cards.length; i++) {
+                const c = cards[i];
+                if (x >= c.x && x <= c.x + cardWidth &&
+                    y >= c.y && y <= c.y + cardHeight) {
+                    clickedCard = c;
+                    break;
+                }
+            }
+
+            // 如果點擊有效且該卡牌尚未翻開或配對
+            if (clickedCard && !clickedCard.isFlipped && !clickedCard.isMatched) {
+                clickedCard.isFlipped = true;
+                flippedCards.push(clickedCard);
+                drawBoard();
+                
+                // 語音提示
+                speak(clickedCard.termData.speech);
+
+                if (flippedCards.length === 2) {
+                    checkMatch();
+                }
+            }
+        }
+
+        function checkMatch() {
+            isLocked = true; // 鎖定版面，禁止點擊
+            const [card1, card2] = flippedCards;
+
+            if (card1.termId === card2.termId) {
+                // 配對成功
+                setTimeout(() => {
+                    card1.isMatched = true;
+                    card2.isMatched = true;
+                    matchedPairs++;
+                    scoreEl.innerText = matchedPairs;
+                    flippedCards = [];
+                    isLocked = false;
+                    drawBoard();
+
+                    if (matchedPairs === 24) {
+                        setTimeout(() => {
+                            speak("好叻啊！你已經學識晒二十四節氣啦！");
+                            alert('恭喜你！成功配對所有節氣！');
+                        }, 500);
+                    }
+                }, 600); // 短暫延遲讓玩家看清楚配對的牌
+            } else {
+                // 配對失敗
+                setTimeout(() => {
+                    card1.isFlipped = false;
+                    card2.isFlipped = false;
+                    flippedCards = [];
+                    isLocked = false;
+                    drawBoard();
+                }, 1200); // 1.2秒後蓋回
+            }
+        }
+
+        // 事件監聽器
+        canvas.addEventListener('mousedown', (e) => {
+            handleInteraction(e.clientX, e.clientY);
+        });
+
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault(); // 防止滾動
+            const touch = e.touches[0];
+            handleInteraction(touch.clientX, touch.clientY);
+        }, { passive: false });
+
+        window.addEventListener('resize', () => {
+            // 使用 debounce 防止 resize 觸發過於頻繁
+            clearTimeout(window.resizeTimer);
+            window.resizeTimer = setTimeout(resizeAndLayout, 200);
+        });
+
+        document.getElementById('restart-btn').addEventListener('click', initGame);
+
+        document.getElementById('start-btn').addEventListener('click', () => {
+            // 瀏覽器要求用戶必須先有互動才能播放語音
+            initSpeech();
+            
+            // 測試發聲，解鎖音頻上下文
+            const u = new SpeechSynthesisUtterance("遊戲開始");
+            u.volume = 0; // 靜音播一句解鎖
+            window.speechSynthesis.speak(u);
+
+            document.getElementById('start-overlay').style.display = 'none';
+            initGame();
+        });
+
+    </script>
+</body>
+</html>
