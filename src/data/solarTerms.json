@@ -21,7 +21,7 @@
     "name": "立春", "month": 2, "day": 4,
     "meridian": "足厥陰肝經", "meridianVessel": "肝經", "meridianSinew": "足厥陰之筋",
     "poses": [
-      { "name": "樹式", "desc": "春屬木，如樹木般扎根生長，疏肝理氣", "imageUrl": "[https://ibb.co/W4YGMZFx][img]https://i.ibb.co/LX2Ycm6k/tree-pose.png[/img][/url]" },
+      { "name": "樹式", "desc": "春屬木，如樹木般扎根生長，疏肝理氣", "imageUrl": "https://ibb.co/W4YGMZFx" },
       { "name": "摩天式", "desc": "向上伸展，順應春氣生發" },
       { "name": "鷹式", "desc": "擠壓關節，促進氣血循環" }
     ]
@@ -48,7 +48,7 @@
     "name": "春分", "month": 3, "day": 20,
     "meridian": "足厥陰肝經", "meridianVessel": "肝經", "meridianSinew": "足厥陰之筋",
     "poses": [
-      { "name": "樹式", "desc": "陰陽平衡，平心靜氣", "imageUrl": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&q=80&w=400" },
+      { "name": "樹式", "desc": "陰陽平衡，平心靜氣", "imageUrl": "https://ibb.co/W4YGMZFx" },
       { "name": "門閂式", "desc": "伸展側腰，疏通肝膽經絡" },
       { "name": "三角式", "desc": "穩定下盤，平衡左右能量" }
     ]
