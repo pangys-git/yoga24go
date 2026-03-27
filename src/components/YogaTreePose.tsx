@@ -874,10 +874,13 @@ export default function YogaTreePose({
                 <X className="w-4 h-4" />
               </button>
               <img 
-                src={currentPose.imageUrl || `https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&q=80&w=400`} 
+                src={currentPose.imageUrl || `https://i.ibb.co/qLmd8PGf/logo-yoga.png`} 
                 alt={currentPose.name}
                 className="w-full h-full object-cover opacity-90"
                 referrerPolicy="no-referrer"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = 'https://i.ibb.co/qLmd8PGf/logo-yoga.png';
+                }}
               />
               <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent p-2 pt-6">
                 <p className="text-white text-xs font-bold text-center drop-shadow-md">{currentPose.name} 參考圖</p>

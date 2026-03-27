@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Gamepad2, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Gamepad2, RefreshCw, ExternalLink } from 'lucide-react';
 import { motion } from 'motion/react';
 
 const QUESTIONS = [
@@ -30,6 +30,17 @@ export default function MiniGame() {
   const [score, setScore] = useState(0);
   const [showResult, setShowResult] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
+  const [iframeKey, setIframeKey] = useState(0);
+
+  const reloadIframe = () => {
+    setIframeKey(prev => prev + 1);
+  };
+
+  const getGameUrl = (path: string) => {
+    // 使用相對路徑或加上 origin 確保在不同環境下都能正確載入
+    const origin = window.location.origin;
+    return `${origin}${path}?v=${iframeKey}`;
+  };
 
   const handleSelect = (option: string) => {
     if (selected) return; // 已選擇過
@@ -57,9 +68,9 @@ export default function MiniGame() {
   };
 
   return (
-    <div className="flex flex-col items-center w-full min-h-screen bg-stone-50 pb-10">
+    <div className="flex flex-col items-center w-full h-screen bg-stone-50 overflow-hidden">
       {/* Header */}
-      <div className="w-full bg-purple-700 text-white p-6 rounded-b-3xl shadow-md mb-6 relative shrink-0">
+      <div className="w-full bg-purple-700 text-white p-6 rounded-b-3xl shadow-md relative shrink-0">
         <Link to="/" className="absolute top-6 left-6 text-white/80 hover:text-white">
           <ArrowLeft className="w-6 h-6" />
         </Link>
@@ -70,50 +81,107 @@ export default function MiniGame() {
         <p className="text-purple-100 text-sm">體驗互動式遊戲與知識問答！</p>
       </div>
 
-      <div className="w-full px-6 flex flex-col gap-6 flex-1">
+      <div className="w-full px-6 py-4 flex flex-col gap-4 flex-1 overflow-hidden">
         {/* Tabs */}
         <div className="flex w-full max-w-md mx-auto bg-stone-200 rounded-xl p-1 shrink-0">
           <button
-            onClick={() => setActiveTab('game1')}
-            className={`flex-1 py-2 text-sm font-bold rounded-lg transition-colors ${activeTab === 'game1' ? 'bg-white text-purple-700 shadow-sm' : 'text-stone-500 hover:text-stone-700'}`}
+            onClick={() => { setActiveTab('game1'); reloadIframe(); }}
+            className={`flex-1 py-2 text-xs sm:text-sm font-bold rounded-lg transition-colors ${activeTab === 'game1' ? 'bg-white text-purple-700 shadow-sm' : 'text-stone-500 hover:text-stone-700'}`}
           >
             互動遊戲 1
           </button>
           <button
-            onClick={() => setActiveTab('game2')}
-            className={`flex-1 py-2 text-sm font-bold rounded-lg transition-colors ${activeTab === 'game2' ? 'bg-white text-purple-700 shadow-sm' : 'text-stone-500 hover:text-stone-700'}`}
+            onClick={() => { setActiveTab('game2'); reloadIframe(); }}
+            className={`flex-1 py-2 text-xs sm:text-sm font-bold rounded-lg transition-colors ${activeTab === 'game2' ? 'bg-white text-purple-700 shadow-sm' : 'text-stone-500 hover:text-stone-700'}`}
           >
             互動遊戲 2
           </button>
           <button
             onClick={() => setActiveTab('qa')}
-            className={`flex-1 py-2 text-sm font-bold rounded-lg transition-colors ${activeTab === 'qa' ? 'bg-white text-purple-700 shadow-sm' : 'text-stone-500 hover:text-stone-700'}`}
+            className={`flex-1 py-2 text-xs sm:text-sm font-bold rounded-lg transition-colors ${activeTab === 'qa' ? 'bg-white text-purple-700 shadow-sm' : 'text-stone-500 hover:text-stone-700'}`}
           >
             知識問答
           </button>
         </div>
 
-        {activeTab === 'game1' ? (
-          <div className="w-full flex-1 relative bg-black rounded-2xl overflow-hidden shadow-inner min-h-[60vh]">
-            <iframe 
-              src="/game1/index.html" 
-              className="w-full h-full absolute inset-0 border-0"
-              title="YOGA24 HTML Game 1"
-              allow="camera; microphone; fullscreen; autoplay"
-            />
-          </div>
-        ) : activeTab === 'game2' ? (
-          <div className="w-full flex-1 relative bg-black rounded-2xl overflow-hidden shadow-inner min-h-[60vh]">
-            <iframe 
-              src="/game2/index.html" 
-              className="w-full h-full absolute inset-0 border-0"
-              title="YOGA24 HTML Game 2"
-              allow="camera; microphone; fullscreen; autoplay"
-            />
-          </div>
-        ) : (
-          <>
-            {!showResult ? (
+        <div className="flex-1 w-full overflow-y-auto">
+          {activeTab === 'game1' ? (
+            <div className="w-full h-full min-h-[400px] relative bg-black rounded-2xl overflow-hidden shadow-inner flex flex-col">
+              <div className="flex-1 relative">
+                <iframe 
+                  key={`game1-${iframeKey}`}
+                  src={getGameUrl('/game1/index.html')} 
+                  className="w-full h-full absolute inset-0 border-0"
+                  title="YOGA24 HTML Game 1"
+                  allow="fullscreen; autoplay; camera; microphone"
+                />
+              </div>
+              <div className="bg-stone-800 p-3 flex justify-between items-center shrink-0 border-t border-stone-700">
+                <div className="flex flex-col">
+                  <span className="text-white text-xs font-bold">互動遊戲 1：瑜伽大師</span>
+                  <span className="text-stone-400 text-[10px]">如無法運作，請嘗試重新整理或全螢幕開啟</span>
+                </div>
+                <div className="flex gap-3">
+                  <button 
+                    onClick={reloadIframe}
+                    className="bg-emerald-600 hover:bg-emerald-700 px-3 py-1.5 rounded-lg text-white text-xs flex items-center gap-1 shadow-lg transition-all active:scale-95"
+                    title="重新整理遊戲"
+                  >
+                    <RefreshCw className="w-3 h-3" />
+                    重新整理
+                  </button>
+                  <a 
+                    href={getGameUrl('/game1/index.html')} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-white/80 hover:text-white text-xs flex items-center gap-1 bg-white/10 px-3 py-1.5 rounded-lg border border-white/20 transition-all"
+                  >
+                    <ExternalLink className="w-3 h-3" />
+                    全螢幕
+                  </a>
+                </div>
+              </div>
+            </div>
+          ) : activeTab === 'game2' ? (
+            <div className="w-full h-full min-h-[400px] relative bg-black rounded-2xl overflow-hidden shadow-inner flex flex-col">
+              <div className="flex-1 relative">
+                <iframe 
+                  key={`game2-${iframeKey}`}
+                  src={getGameUrl('/game2/index.html')} 
+                  className="w-full h-full absolute inset-0 border-0"
+                  title="YOGA24 HTML Game 2"
+                  allow="fullscreen; autoplay; camera; microphone"
+                />
+              </div>
+              <div className="bg-stone-800 p-3 flex justify-between items-center shrink-0 border-t border-stone-700">
+                <div className="flex flex-col">
+                  <span className="text-white text-xs font-bold">互動遊戲 2：節氣記憶</span>
+                  <span className="text-stone-400 text-[10px]">如無法運作，請嘗試重新整理或全螢幕開啟</span>
+                </div>
+                <div className="flex gap-3">
+                  <button 
+                    onClick={reloadIframe}
+                    className="bg-emerald-600 hover:bg-emerald-700 px-3 py-1.5 rounded-lg text-white text-xs flex items-center gap-1 shadow-lg transition-all active:scale-95"
+                    title="重新整理遊戲"
+                  >
+                    <RefreshCw className="w-3 h-3" />
+                    重新整理
+                  </button>
+                  <a 
+                    href={getGameUrl('/game2/index.html')} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-white/80 hover:text-white text-xs flex items-center gap-1 bg-white/10 px-3 py-1.5 rounded-lg border border-white/20 transition-all"
+                  >
+                    <ExternalLink className="w-3 h-3" />
+                    全螢幕
+                  </a>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="pb-10">
+              {!showResult ? (
           <motion.div 
             key={currentQ}
             initial={{ opacity: 0, x: 20 }}
@@ -190,8 +258,9 @@ export default function MiniGame() {
             </button>
           </motion.div>
         )}
-          </>
-        )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -1,9 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, BookOpen, Leaf, Sun, Snowflake, CloudRain } from 'lucide-react';
+import { ArrowLeft, BookOpen, Leaf, Sun, Snowflake, CloudRain, Database, CheckCircle, AlertCircle } from 'lucide-react';
 import { motion } from 'motion/react';
+import { useSolarTerms } from '../hooks/useSolarTerms';
 
 export default function KnowledgeBase() {
+  const { dataSource, loading } = useSolarTerms();
+
   return (
     <div className="flex flex-col items-center w-full min-h-screen bg-stone-50 pb-10">
       {/* Header */}
@@ -19,6 +22,34 @@ export default function KnowledgeBase() {
       </div>
 
       <div className="w-full px-6 flex flex-col gap-6">
+        {/* Data Source Status */}
+        <div className="bg-white p-4 rounded-2xl shadow-sm border border-stone-100 flex items-center justify-between">
+          <div className="flex items-center gap-2 text-stone-600 text-sm">
+            <Database className="w-4 h-4" />
+            <span>資料來源：</span>
+          </div>
+          <div className="flex items-center gap-2">
+            {loading ? (
+              <span className="text-stone-400 text-xs animate-pulse">正在連線...</span>
+            ) : dataSource === 'sheet' ? (
+              <div className="flex items-center gap-1 text-emerald-600 text-xs font-bold">
+                <CheckCircle className="w-3 h-3" />
+                <span>Google Sheet (雲端)</span>
+              </div>
+            ) : dataSource === 'local' ? (
+              <div className="flex items-center gap-1 text-amber-600 text-xs font-bold">
+                <AlertCircle className="w-3 h-3" />
+                <span>內建資料 (本地)</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-1 text-red-600 text-xs font-bold">
+                <AlertCircle className="w-3 h-3" />
+                <span>連線失敗</span>
+              </div>
+            )}
+          </div>
+        </div>
+
         <motion.div 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}

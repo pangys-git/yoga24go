@@ -31,9 +31,10 @@ export function useSolarTerms() {
                 ...item,
                 poses: item.poses.map((p: any, index: number) => {
                   const defaultPose = defaultTerm?.poses.find(dp => dp.name.trim() === (p.name || '').trim()) || defaultTerm?.poses[index];
+                  const finalImageUrl = (p.imageUrl && p.imageUrl.trim().length > 10) ? p.imageUrl.trim() : defaultPose?.imageUrl;
                   return {
                     ...p,
-                    imageUrl: p.imageUrl || defaultPose?.imageUrl
+                    imageUrl: finalImageUrl
                   };
                 })
               };
@@ -51,21 +52,22 @@ export function useSolarTerms() {
                 { 
                   name: item.yoga1 || '', 
                   desc: item.desc1 || '',
-                  imageUrl: item.imageUrl1 || item.imageUrl || 
+                  imageUrl: (item.imageUrl1 && item.imageUrl1.trim().length > 10) ? item.imageUrl1.trim() : 
+                            (item.imageUrl && item.imageUrl.trim().length > 10) ? item.imageUrl.trim() :
                             defaultTerm?.poses.find(dp => dp.name.trim() === (item.yoga1 || '').trim())?.imageUrl ||
                             defaultTerm?.poses[0]?.imageUrl
                 },
                 { 
                   name: item.yoga2 || '', 
                   desc: item.desc2 || '',
-                  imageUrl: item.imageUrl2 || 
+                  imageUrl: (item.imageUrl2 && item.imageUrl2.trim().length > 10) ? item.imageUrl2.trim() : 
                             defaultTerm?.poses.find(dp => dp.name.trim() === (item.yoga2 || '').trim())?.imageUrl ||
                             defaultTerm?.poses[1]?.imageUrl
                 },
                 { 
                   name: item.yoga3 || '', 
                   desc: item.desc3 || '',
-                  imageUrl: item.imageUrl3 || 
+                  imageUrl: (item.imageUrl3 && item.imageUrl3.trim().length > 10) ? item.imageUrl3.trim() : 
                             defaultTerm?.poses.find(dp => dp.name.trim() === (item.yoga3 || '').trim())?.imageUrl ||
                             defaultTerm?.poses[2]?.imageUrl
                 }
